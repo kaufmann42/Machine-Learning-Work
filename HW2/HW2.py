@@ -1,9 +1,19 @@
 #import statements
-import SKLearn as svc
+from sklearn import svm
 import numpy as np
 import pandas as pd
+import cm
 
 #import the database
-pd.read_excel('Data_Cortex_Nuclear.xlsx', 'Sheet1', index_col=None, na_values=['NA'])
+raw_data = pd.read_csv('data.csv')
 
-# svc = svm.SVC(kernal = 'linear')
+training_data = raw_data.ix[0:300,:-1]
+target = raw_data.ix[0:300,-1]
+
+clf = svm.SVC()
+clf.fit(training_data, target)
+
+predicting_data = raw_data.ix[301:400,:-1]
+predicting_target = raw_data.ix[301:400,-1]
+
+cm.print_ConfusionMatrix(clf.predict(predicting_data), predicting_target)
