@@ -16,4 +16,4 @@ clf.fit(training_data, target)
 predicting_data = raw_data.ix[301:400,:-1]
 predicting_target = raw_data.ix[301:400,-1]
 
-cm.print_ConfusionMatrix(clf.predict(predicting_data), predicting_target)
+cm.print_ConfusionMatrix(clf.predict(predicting_data), predicting_target, "SVM")

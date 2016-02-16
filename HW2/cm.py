@@ -1,5 +1,10 @@
+# John Kaufmann
+# 3/16/2016
+# BME4931
+#
+# print a confusion matrix given the predicted classifiers, the actual classifiers and the name of the structure
 
-def print_ConfusionMatrix(predicted, actual):
+def print_ConfusionMatrix(predicted, actual, name):
     actual = predicted
     total = actual.shape[0]
 
@@ -19,7 +24,7 @@ def print_ConfusionMatrix(predicted, actual):
         elif predicted[i] == 1 and actual[i] == 1:
             four += 1
     #print everythin
-    print("***Decision Tree***")
+    print("***" + name + "***")
     print("\t\t"+"Predicted Negative\t"+"Predicted Positive\t")
     print("Negative Cases\t"+str(one)+"\t\t\t"+str(two)+"\t")
     print("Positive Cases\t"+str(three)+"\t\t\t"+str(four)+"\t")
