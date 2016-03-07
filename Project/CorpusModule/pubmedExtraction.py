@@ -1,11 +1,14 @@
 from __future__ import print_function
+from __future__ import division
 from Bio import Entrez, Medline
 import csv
-import time
+import sys
+from textblob import TextBlob
 
-def update_progress(progress):
-    int(progress=progress*100)
-    print('\r[{0}] {1}%'.format('#'*(progress/10), progress))
+def update_progress(prog_bar):
+    prog_bar = int(prog_bar*100)
+    sys.stdout.write('\r[{0}{1}] {2}%'.format('|'*int(prog_bar), ' '*int(100-prog_bar), (prog_bar+1)))
+    sys.stdout.flush()
 
 def getAbstracts(input_filename):
     print("getting terms from: ",input_filename,"...")
@@ -35,11 +38,64 @@ def printAbstracts(terms, output_filename):
                                        retmode="text")
             records = Medline.parse(handle)
 
-            x = 0
             for record in records:
-                b = "Writing" + "." * (x%3)
-                x += 1
-                print(b, end="\r")
                 f.write(record.get("AB", "?"))
 
+def getSentiment(text):
+    blob = TextBlob(text)
+    return blob.sentiment.polarity
+
+def printSentiments(terms, output_filename):
+    print("collecting abstracts and printing sentiments to ",output_filename,"...")
+    num_terms = int(len(terms))
+    with open(output_filename, 'w') as f:
+        for term in terms:
+            # print("Getting term: ",str(term)) # debugging
+            update_progress(float(int(terms.index(term))/num_terms))
+            Entrez.email = "kaufmann42@ufl.edu"     # Always tell NCBI who you are
+
+            handle = Entrez.esearch(db="pubmed", term=term, retmax=463)
+            record = Entrez.read(handle)
+            idlist = record["IdList"]
+
+            handle = Entrez.efetch(db="pubmed", id=idlist, rettype="medline",
+                                       retmode="text")
+            records = Medline.parse(handle)
+            f.write(term)
+            for record in records:
+                f.write(", ")
+                f.write(str(getSentiment(record.get("AB", "?"))))
+            f.write("\n")
+
+def printAverageSentiments(terms, output_filename):
+    print("collecting abstracts and printing sentiments to ",output_filename,"...")
+    num_terms = int(len(terms))
+    with open(output_filename, 'w') as f:
+        for term in terms:
+            # print("Getting term: ",str(term)) # debugging
+            update_progress(float(int(terms.index(term))/num_terms))
+            Entrez.email = "kaufmann42@ufl.edu"     # Always tell NCBI who you are
+
+            handle = Entrez.esearch(db="pubmed", term=term, retmax=463)
+            record = Entrez.read(handle)
+            idlist = record["IdList"]
+
+            handle = Entrez.efetch(db="pubmed", id=idlist, rettype="medline",
+                                       retmode="text")
+            records = Medline.parse(handle)
+
+            total = 0
+            sum_sentiments = 0.0
+            f.write(term + ", ")
+            for record in records:
+                total += 1
+                sum_sentiments += float(getSentiment(record.get("AB", "?")))
+
+            sentiment = float(sum_sentiments/total)
+            # print("The sentiment is: ", sentiment)
+            f.write(str(sentiment))
+            f.write("\n")
+
 print("running","program")
+terms = getAbstracts('data.csv')
+printAverageSentiments(terms, 'bs.csv')
