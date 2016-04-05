@@ -40,6 +40,7 @@ def printAbstracts(terms, output_filename):
 
             for record in records:
                 f.write(record.get("AB", "?"))
+                f.write("\n")
 
 def getSentiment(text):
     blob = TextBlob(text)
@@ -98,4 +99,4 @@ def printAverageSentiments(terms, output_filename):
 
 print("running","program")
 terms = getAbstracts('data.csv')
-printAverageSentiments(terms, 'bs.csv')
+printAbstracts(terms, 'word2vecdata.txt')
